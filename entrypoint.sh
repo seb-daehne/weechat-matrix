@@ -10,4 +10,4 @@ if [ ! -e ~/.weechat/python/matrix ]; then
   cp -R ~/weechat-matrix/matrix ~/.weechat/python/matrix
 fi
 
-exec weechat
+TERM=screen-256color weechat
