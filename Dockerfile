@@ -13,7 +13,9 @@
 #
 FROM alpine:latest
 
-RUN apk add --no-cache \
+RUN apk update --no-cache && \
+  apk upgrade --no-cache && \  
+  apk add --no-cache \
 	build-base \
 	ca-certificates \
 	git \
