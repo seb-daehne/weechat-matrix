@@ -33,19 +33,17 @@ RUN apk update --no-cache && \
 ENV HOME /home/user
 
 RUN adduser -S user -h $HOME \
-	&& chown -R user $HOME \
-	&& cd $HOME \
-	&& git clone https://github.com/poljar/weechat-matrix.git \
-	&& cd weechat-matrix \
-	&& pip install -r requirements.txt \
-	&& pip install websocket-client \
-	&& make install \
 	&& chown -R user $HOME
-
-ADD entrypoint.sh $HOME/entrypoint.sh
 
 WORKDIR $HOME
 USER user
 
+RUN git clone https://github.com/poljar/weechat-matrix.git \
+	&& cd weechat-matrix \
+	&& pip install --user -r requirements.txt \
+	&& pip install --user websocket-client \
+	&& make install 
+
+ADD entrypoint.sh $HOME/entrypoint.sh
 
 CMD [ "/bin/sh", "entrypoint.sh" ]
