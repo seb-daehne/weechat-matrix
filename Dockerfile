@@ -40,8 +40,9 @@ USER user
 
 RUN git clone https://github.com/poljar/weechat-matrix.git \
 	&& cd weechat-matrix \
-	&& pip install --user -r requirements.txt \
-	&& pip install --user websocket-client \
+	&& pip install --no-cache-dir --user wheel\
+	&& pip install --no-cache-dir --user -r requirements.txt \
+	&& pip install --no-cache-dir --user websocket-client \
 	&& make install 
 
 ADD entrypoint.sh $HOME/entrypoint.sh
