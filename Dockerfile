@@ -1,50 +1,33 @@
-# Usage:
-# 	Building
-# 		docker build -t weechat-matrix .
-#	Running (no saved state)
-# 		docker run -it \
-#			-v /etc/localtime:/etc/localtime:ro \ # for your time
-# 			weechat-matrix
-# 	Running (saved state)
-# 		docker run -it \
-#			-v /etc/localtime:/etc/localtime:ro \ # for your time
-# 			-v "${HOME}/.weechat:/home/user/.weechat" \
-# 			weechat-matrix
-#
-FROM alpine:latest
+FROM debian:testing-slim
 
-RUN apk update --no-cache && \
-  apk upgrade --no-cache && \  
-  apk add --no-cache \
-	build-base \
-	ca-certificates \
-	git \
-	libffi-dev \
-	libressl-dev \
-	olm-dev \
-	python \
-	python-dev \
-	py2-pip \
-	weechat \
-	weechat-perl \
-	weechat-python \
-	--repository https://dl-4.alpinelinux.org/alpine/edge/testing
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt-get update -y; apt-get install -q -y \
+  git \
+  libolm-dev \
+  python3 \
+  python3-pip \
+  weechat-curses \
+  weechat-python \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -fr /root/.cache
 
 ENV HOME /home/user
 
-RUN adduser -S user -h $HOME \
-	&& chown -R user $HOME
-
-WORKDIR $HOME
-USER user
+RUN adduser --home $HOME --disabled-password --gecos "" user \
+	  && chown -R user $HOME
 
 RUN git clone https://github.com/poljar/weechat-matrix.git \
 	&& cd weechat-matrix \
-	&& pip install --no-cache-dir --user wheel\
-	&& pip install --no-cache-dir --user -r requirements.txt \
-	&& pip install --no-cache-dir --user websocket-client \
-	&& make install 
+	&& pip3 install --no-cache-dir wheel\
+	&& pip3 install --no-cache-dir -r requirements.txt \
+	&& pip3 install --no-cache-dir websocket-client \
+	&& make install \
+	&& chown -R user $HOME
 
 ADD entrypoint.sh $HOME/entrypoint.sh
+
+WORKDIR $HOME
+USER user
 
 CMD [ "/bin/sh", "entrypoint.sh" ]
